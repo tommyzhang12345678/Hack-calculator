@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Roller</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dice-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .dice-option {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .dice-option:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .dice-option.active {
+            background: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+        
+        .roll-button {
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            border: none;
+            border-radius: 50px;
+            padding: 1rem 2.5rem;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            margin-top: 1rem;
+        }
+        
+        .roll-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .roll-button:active {
+            transform: translateY(0);
+        }
+        
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .die {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: transform 0.5s ease;
+        }
+        
+        .die.rolling {
+            animation: roll 0.5s ease-in-out;
+        }
+        
+        @keyframes roll {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            75% { transform: rotate(270deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+        
+        .die::before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        
+        .results {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .results h2 {
+            margin-bottom: 1rem;
+        }
+        
+        .total {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            color: #ffcc00;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+        
+        .history {
+            margin-top: 1.5rem;
+        }
+        
+        .history-item {
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .die {
+                width: 80px;
+                height: 80px;
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>100% really true dice roller</h1>
+        <p class="subtitle">By Amazing Tommy.Z</p>
+        
+        <div class="controls">
+            <h2>Select Dice</h2>
+            <div class="dice-selector">
+                <button class="dice-option active" data-dice="1">1 Die</button>
+                <button class="dice-option" data-dice="2">2 Dice</button>
+                <button class="dice-option" data-dice="3">3 Dice</button>
+                <button class="dice-option" data-dice="4">4 Dice</button>
+                <button class="dice-option" data-dice="5">5 Dice</button>
+                <button class="dice-option" data-dice="6">6 Dice</button>
+                <button class="dice-option" data-dice="7">7 Dice</button>
+                <button class="dice-option" data-dice="67">67 Dice</button>
+                
+            </div>
+            
+            <button class="roll-button">ROLL DICE</button>
+        </div>
+        
+        <div class="dice-container" id="diceContainer">
+            <!-- Dice will be generated here -->
+        </div>
+        
+        <div class="results">
+            <h2>Results</h2>
+            <div class="total" id="total">-</div>
+            <div class="history">
+                <h3>Roll History</h3>
+                <div id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hidden instructions in console
+        console.log(`🎲 DICE ROLLER SECRET CONTROLS 🎲
+        
+How to use custom dice:
+• Type numbers like "3 5" then press Tab
+• If you have 4 dice selected and type "3 5":
+  - First 3 dice will show 5
+  - 4th dice will be random
+• Press Spacebar to roll
+• Press Escape to clear custom dice
+
+Examples:
+• "2 6" + Tab = 2 dice showing 6
+• "3 1" + Tab = 3 dice showing 1
+• "1 4" + Tab = 1 dice showing 4`);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const diceContainer = document.getElementById('diceContainer');
+            const totalElement = document.getElementById('total');
+            const historyList = document.getElementById('historyList');
+            const rollButton = document.querySelector('.roll-button');
+            const diceOptions = document.querySelectorAll('.dice-option');
+            
+            let diceCount = 1;
+            let rollHistory = [];
+            let customDice = null;
+            let customInputBuffer = '';
+            
+            // Initialize dice
+            updateDiceDisplay();
+            
+            // Set up dice count selection
+            diceOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    diceOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    diceCount = parseInt(this.getAttribute('data-dice'));
+                    updateDiceDisplay();
+                });
+            });
+            
+            // Roll dice when button is clicked
+            rollButton.addEventListener('click', rollDice);
+            
+            // Keyboard controls for hidden custom dice feature
+            document.addEventListener('keydown', function(e) {
+                // Custom dice: Type numbers like "3 5" then Tab
+                if ((e.key >= '0' && e.key <= '9') || e.key === ' ') {
+                    if (e.target.tagName !== 'INPUT') {
+                        handleCustomDiceInput(e.key);
+                        e.preventDefault();
+                    }
+                }
+                
+                // Set custom dice with Tab key
+                if (e.code === 'Tab' && e.target.tagName !== 'INPUT') {
+                    e.preventDefault();
+                    processCustomDice();
+                }
+                
+                // Roll with Spacebar
+                if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+                    e.preventDefault();
+                    rollDice();
+                }
+                
+                // Clear custom dice with Escape
+                if (e.code === 'Escape') {
+                    customDice = null;
+                    customInputBuffer = '';
+                }
+            });
+            
+            function handleCustomDiceInput(key) {
+                if (key === ' ') {
+                    // Add space to separate numbers
+                    customInputBuffer += ' ';
+                } else {
+                    // Add numbers to buffer
+                    customInputBuffer += key;
+                }
+            }
+            
+            function processCustomDice() {
+                const parts = customInputBuffer.split(' ');
+                if (parts.length === 2) {
+                    const count = parseInt(parts[0]);
+                    const value = parseInt(parts[1]);
+                    
+                    if (!isNaN(count) && !isNaN(value) && count > 0 && value >= 1 && value <= 6) {
+                        customDice = { 
+                            count: Math.min(count, diceCount), // Don't exceed selected dice count
+                            value: value 
+                        };
+                        
+                        customInputBuffer = '';
+                        
+                        // Show brief confirmation on roll button
+                        const originalText = rollButton.textContent;
+                        if (count > diceCount) {
+                            rollButton.textContent = `Custom: ${diceCount}/${count} dice`;
+                        } else {
+                            rollButton.textContent = `Custom: ${count} dice`;
+                        }
+                        setTimeout(() => {
+                            rollButton.textContent = originalText;
+                        }, 1000);
+                    }
+                }
+                customInputBuffer = '';
+            }
+            
+            function updateDiceDisplay() {
+                diceContainer.innerHTML = '';
+                for (let i = 0; i < diceCount; i++) {
+                    const die = document.createElement('div');
+                    die.className = 'die';
+                    die.textContent = '?';
+                    diceContainer.appendChild(die);
+                }
+            }
+            
+            function rollDice() {
+                const dice = document.querySelectorAll('.die');
+                let results = [];
+                let total = 0;
+                
+                // Add rolling animation
+                dice.forEach(die => {
+                    die.classList.add('rolling');
+                    die.textContent = '?';
+                });
+                
+                // Generate results after animation
+                setTimeout(() => {
+                    if (customDice) {
+                        // Use custom dice values for specified count, random for the rest
+                        dice.forEach((die, index) => {
+                            if (index < customDice.count) {
+                                // Custom dice
+                                die.textContent = customDice.value;
+                                results.push(customDice.value);
+                                total += customDice.value;
+                            } else {
+                                // Random dice
+                                const result = Math.floor(Math.random() * 6) + 1;
+                                die.textContent = result;
+                                results.push(result);
+                                total += result;
+                            }
+                        });
+                        customDice = null; // Reset after use
+                    } else {
+                        // Generate random results for all dice
+                        dice.forEach(die => {
+                            const result = Math.floor(Math.random() * 6) + 1;
+                            //const result = 1
+                            die.textContent = result;
+                            results.push(result);
+                            total += result;
+                        });
+                    }
+                    
+                    dice.forEach(die => {
+                        die.classList.remove('rolling');
+                    });
+                    
+                    // Update total
+                    totalElement.textContent = total;
+                    
+                    // Add to history (only keep 2 most recent)
+                    const timestamp = new Date().toLocaleTimeString();
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.textContent = `${timestamp}: ${results.join(' + ')} = ${total}`;
+                    
+                    // Add to beginning and remove if more than 2
+                    historyList.prepend(historyItem);
+                    if (historyList.children.length > 2) {
+                        historyList.removeChild(historyList.lastChild);
+                    }
+                    
+                    // Add to roll history array
+                    rollHistory.push({
+                        dice: results,
+                        total: total,
+                        time: timestamp
+                    });
+                }, );
+            }
+        });
+    </script>
+</body>
+</html>

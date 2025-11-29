@@ -1,1 +1,1 @@
-# Hack-calculator
+# Dice Roller
